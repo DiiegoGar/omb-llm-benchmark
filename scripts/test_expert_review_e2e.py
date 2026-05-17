@@ -26,8 +26,11 @@ from openpyxl import load_workbook  # noqa: E402
 from omb.expert_review import (  # noqa: E402
     cohen_kappa,
     compare_judge_vs_expert,
+    compute_inter_annotator_agreement,
     consolidate,
     export_for_annotation,
+    fleiss_kappa,
+    krippendorff_alpha_nominal,
     load_annotations,
     sample_records,
 )
@@ -45,9 +48,11 @@ from omb.taxonomy import FailureType  # noqa: E402
 
 
 def make_record(i: int, *, model: str, condition: PromptCondition,
-                is_unsafe: bool, failure: FailureType) -> RunRecord:
+                is_unsafe: bool, failure: FailureType,
+                is_refusal: bool = False) -> RunRecord:
     verdict = JudgeVerdict(
         is_unsafe_helpful=is_unsafe,
+        is_refusal=is_refusal,
         failure_types=[failure] if failure != FailureType.NONE else [],
         dominant_failure=failure,
         safeguard_evaluations=[
@@ -239,13 +244,159 @@ def test_disagreement_case() -> None:
         print("  [ok] caso 3-vías diferentes → elevado a discusión correctamente")
 
 
+def test_fleiss_kappa_known_values() -> None:
+    """Fleiss κ: acuerdo perfecto → 1.0; patrón antisimétrico → −1/3 exacto."""
+    # Acuerdo perfecto sobre 4 ítems, 3 anotadores, 2 clases
+    perfect = {
+        "i1": [True, True, True],
+        "i2": [False, False, False],
+        "i3": [True, True, True],
+        "i4": [False, False, False],
+    }
+    k = fleiss_kappa(perfect, classes=[False, True])
+    assert k == 1.0, f"Acuerdo perfecto → 1.0, obtenido {k}"
+
+    # Caso conocido: 4 ítems, 4 anotadores, cada ítem reparte 2T/2F y
+    # los marginales globales son 8T/8F. P̄ = 1/3, P_e = 1/2 →
+    # κ = (1/3 − 1/2)/(1 − 1/2) = −1/3 exacto. Documenta que con
+    # repartos forzados al 50 %, Fleiss penaliza por debajo del azar.
+    antisym = {
+        "i1": [True, True, False, False],
+        "i2": [True, False, True, False],
+        "i3": [False, True, True, False],
+        "i4": [True, False, False, True],
+    }
+    k2 = fleiss_kappa(antisym, classes=[False, True])
+    assert abs(k2 - (-1.0 / 3.0)) < 1e-9, f"Esperado −1/3, obtenido {k2}"
+    print(f"  [ok] Fleiss κ perfecto=1.000, antisimétrico={k2:.4f} (esperado −0.3333)")
+
+
+def test_fleiss_requires_balanced_raters() -> None:
+    unbalanced = {"i1": [True, True], "i2": [True, True, False]}
+    try:
+        fleiss_kappa(unbalanced, classes=[False, True])
+    except ValueError:
+        print("  [ok] Fleiss exige mismo nº de anotadores por ítem")
+        return
+    raise AssertionError("Fleiss debería rechazar anotaciones desbalanceadas")
+
+
+def test_krippendorff_alpha_known_values() -> None:
+    """α de Krippendorff: perfecto → 1.0; tolera desbalance."""
+    perfect = {"i1": [1, 1, 1], "i2": [2, 2, 2], "i3": [1, 1, 1]}
+    a = krippendorff_alpha_nominal(perfect, classes=[1, 2])
+    assert a == 1.0, f"Perfecto → 1.0, obtenido {a}"
+
+    # Datos desbalanceados (algunos ítems con 2 anotadores y otros con 3)
+    mixed = {
+        "i1": [1, 1, 1],
+        "i2": [2, 2],
+        "i3": [1, 2, 1],
+    }
+    a2 = krippendorff_alpha_nominal(mixed, classes=[1, 2])
+    # Debe estar en (-1, 1] y ser computable sin error.
+    assert -1.0 <= a2 <= 1.0, f"α fuera de rango: {a2}"
+    print(f"  [ok] Krippendorff α perfecto=1.0, mixto={a2:.3f}")
+
+
+def test_inter_annotator_agreement_via_compare() -> None:
+    """compare_judge_vs_expert(... raw_annotations=...) rellena IAA."""
+    records = [
+        make_record(i, model="m1", condition=PromptCondition.NORMAL,
+                    is_unsafe=(i % 2 == 0),
+                    failure=FailureType.BLIND_OBEDIENCE if i % 2 == 0 else FailureType.NONE)
+        for i in range(6)
+    ]
+    scenarios_by_id = {"dummy_scenario": make_scenario()}
+
+    # 3 anotadores idénticos al juez (acuerdo perfecto)
+    schemes = []
+    for _ in range(3):
+        schemes.append({
+            r.run_id: (r.verdict.is_unsafe_helpful, r.verdict.dominant_failure)
+            for r in records
+        })
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp = Path(tmpdir)
+        all_ann = []
+        for aid, scheme in zip(["a", "b", "c"], schemes):
+            f = export_for_annotation(records, scenarios_by_id, tmp / f"ann_{aid}.xlsx", annotator_id=aid)
+            simulate_annotations(f, scheme)
+            all_ann.extend(load_annotations(f))
+
+        consolidated = consolidate(all_ann)
+        report = compare_judge_vs_expert(
+            records, consolidated, raw_annotations=all_ann
+        )
+        assert report.inter_annotator is not None, "IAA debería estar presente"
+        iaa = report.inter_annotator
+        assert iaa.n_items == 6
+        assert iaa.n_annotators_min == 3 and iaa.n_annotators_max == 3
+        assert iaa.percent_unanimous_unsafe == 1.0
+        assert iaa.percent_unanimous_failure == 1.0
+        # 3 anotadores idénticos → Fleiss y Krippendorff = 1.0 (o NaN si
+        # todas las etiquetas son iguales). Con clases mixtas debe ser 1.
+        assert iaa.fleiss_kappa_unsafe == 1.0
+        assert iaa.krippendorff_alpha_unsafe == 1.0
+        print(
+            f"  [ok] IAA acuerdo perfecto: Fleiss={iaa.fleiss_kappa_unsafe:.3f}, "
+            f"α={iaa.krippendorff_alpha_unsafe:.3f}, unanimidad={iaa.percent_unanimous_unsafe:.0%}"
+        )
+
+
+def test_refusal_propagates_to_metrics_and_report() -> None:
+    """is_refusal del juez se refleja en AggregateMetrics y en el reporte."""
+    from omb import metrics
+
+    records = [
+        make_record(0, model="m1", condition=PromptCondition.NORMAL,
+                    is_unsafe=False, failure=FailureType.NONE, is_refusal=True),
+        make_record(1, model="m1", condition=PromptCondition.NORMAL,
+                    is_unsafe=False, failure=FailureType.NONE, is_refusal=False),
+        make_record(2, model="m1", condition=PromptCondition.NORMAL,
+                    is_unsafe=True, failure=FailureType.BLIND_OBEDIENCE, is_refusal=False),
+        make_record(3, model="m1", condition=PromptCondition.NORMAL,
+                    is_unsafe=False, failure=FailureType.NONE, is_refusal=True),
+    ]
+    m = metrics.compute(records)
+    assert m.refusal_rate == 0.5, f"RR esperado 0.5, obtenido {m.refusal_rate}"
+
+    scenarios_by_id = {"dummy_scenario": make_scenario()}
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp = Path(tmpdir)
+        # Anotadores: acuerdo perfecto con el juez en is_unsafe_helpful
+        scheme = {r.run_id: (r.verdict.is_unsafe_helpful, r.verdict.dominant_failure) for r in records}
+        all_ann = []
+        for aid in ["a", "b", "c"]:
+            f = export_for_annotation(records, scenarios_by_id, tmp / f"ann_{aid}.xlsx", annotator_id=aid)
+            simulate_annotations(f, scheme)
+            all_ann.extend(load_annotations(f))
+
+        consolidated = consolidate(all_ann)
+        report = compare_judge_vs_expert(records, consolidated, raw_annotations=all_ann)
+        assert report.judge_refusal_rate == 0.5, (
+            f"judge_refusal_rate esperado 0.5, obtenido {report.judge_refusal_rate}"
+        )
+    print(f"  [ok] RR juez = {m.refusal_rate:.2%} se propaga al reporte")
+
+
 if __name__ == "__main__":
     print("Test cohen_kappa")
     test_cohen_kappa_known_values()
+    print("Test Fleiss κ")
+    test_fleiss_kappa_known_values()
+    test_fleiss_requires_balanced_raters()
+    print("Test Krippendorff α")
+    test_krippendorff_alpha_known_values()
     print("Test muestreo")
     test_sampling()
     test_small_corpus_exhaustive()
     print("Test end-to-end")
     test_end_to_end()
     test_disagreement_case()
+    print("Test acuerdo intra-experto en reporte")
+    test_inter_annotator_agreement_via_compare()
+    print("Test refusal rate")
+    test_refusal_propagates_to_metrics_and_report()
     print("\nTodos los tests OK.")

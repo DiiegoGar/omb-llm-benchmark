@@ -101,7 +101,9 @@ def main(
             if c.requires_discussion:
                 console.print(f"  - {c.run_id}")
 
-    report = compare_judge_vs_expert(records, consolidated)
+    report = compare_judge_vs_expert(
+        records, consolidated, raw_annotations=all_annotations
+    )
 
     # ── Salida tabular ─────────────────────────────────────────────────────
     console.rule("[bold]Acuerdo juez automático vs consenso experto")
@@ -112,6 +114,7 @@ def main(
     t.add_row("", "")
     t.add_row("UHR según juez", f"{report.judge_uhr:.2%}")
     t.add_row("UHR según experto", f"{report.expert_uhr:.2%}")
+    t.add_row("RR según juez", f"{report.judge_refusal_rate:.2%}")
     t.add_row("", "")
     t.add_row(
         "Acuerdo is_unsafe_helpful",
@@ -131,6 +134,39 @@ def main(
         f"{report.kappa_dominant_failure:.3f}",
     )
     console.print(t)
+
+    if report.inter_annotator is not None:
+        iaa = report.inter_annotator
+        console.rule("[bold]Acuerdo intra-experto (anotaciones crudas)")
+        it = Table(show_header=False)
+        it.add_row("n ítems anotados", str(iaa.n_items))
+        rango = (
+            f"{iaa.n_annotators_min}"
+            if iaa.n_annotators_min == iaa.n_annotators_max
+            else f"{iaa.n_annotators_min}–{iaa.n_annotators_max}"
+        )
+        it.add_row("anotadores por ítem", rango)
+        it.add_row("", "")
+        it.add_row("Fleiss κ is_unsafe_helpful", _fmt_coef(iaa.fleiss_kappa_unsafe))
+        it.add_row(
+            "Krippendorff α is_unsafe_helpful",
+            f"{_fmt_coef(iaa.krippendorff_alpha_unsafe)}  (umbral aceptable ≥0.667)",
+        )
+        it.add_row(
+            "Unanimidad is_unsafe_helpful",
+            f"{iaa.percent_unanimous_unsafe:.2%}",
+        )
+        it.add_row("", "")
+        it.add_row("Fleiss κ dominant_failure", _fmt_coef(iaa.fleiss_kappa_failure))
+        it.add_row(
+            "Krippendorff α dominant_failure",
+            f"{_fmt_coef(iaa.krippendorff_alpha_failure)}  (umbral aceptable ≥0.667)",
+        )
+        it.add_row(
+            "Unanimidad dominant_failure",
+            f"{iaa.percent_unanimous_failure:.2%}",
+        )
+        console.print(it)
 
     if report.passes_validation_threshold:
         console.print(
@@ -171,6 +207,12 @@ def main(
         encoding="utf-8",
     )
     console.print(f"\n[green]AgreementReport guardado en {output_json}[/green]")
+
+
+def _fmt_coef(v: float) -> str:  # noqa: ANN001
+    if v != v:  # NaN
+        return "—"
+    return f"{v:.3f}"
 
 
 if __name__ == "__main__":

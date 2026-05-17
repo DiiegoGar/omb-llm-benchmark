@@ -163,6 +163,7 @@ def _print_summary(records) -> None:  # noqa: ANN001
     breakdown.add_column("NCR", justify="right")
     breakdown.add_column("ICR", justify="right")
     breakdown.add_column("SC", justify="right")
+    breakdown.add_column("RR", justify="right")
     breakdown.add_column("EID", justify="right")
     breakdown.add_column("DMR", justify="right")
     for key, m in by_mc.by_key.items():
@@ -174,6 +175,7 @@ def _print_summary(records) -> None:  # noqa: ANN001
             _fmt(m.normative_collapse_rate),
             _fmt(m.internal_contradiction_rate),
             _fmt(m.safeguard_completeness),
+            _fmt(m.refusal_rate),
             _fmt(m.expected_in_detected_rate),
             _fmt(m.dominant_match_rate),
         )
