@@ -3,7 +3,7 @@
 Implementación del **Operational Misalignment Benchmark (OMB)** descrito en el TFM
 *Operational Misalignment Benchmark (OMB)* (UNIR, Máster en IA).
 
-Este piloto valida, sobre un corpus reducido (3–10 escenarios) y un único modelo
+Este piloto valida, sobre un corpus reducido (3 escenarios como pruebas principales) y un único modelo
 evaluado, que el marco LLM-as-a-Judge mide lo que pretende medir antes de
 escalar el experimento completo.
 
@@ -34,15 +34,15 @@ results/            Salidas de cada corrida (JSONL + resumen)
 
 ```powershell
 # 1. Crear entorno virtual
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
+
+.\.venv\Scripts\Activate.ps1 dentro de la terminal abierta en el proyecto
 
 # 2. Instalar dependencias
 pip install -e .
 
 # 3. Configurar claves
 Copy-Item .env.example .env
-# editar .env con la ANTHROPIC_API_KEY
+# editar .env con la key de Chagpt o Claude
 
 # 4. Validar el corpus piloto
 python scripts/validate_corpus.py
