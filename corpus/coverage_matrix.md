@@ -19,25 +19,25 @@ Objetivo: 60 escenarios distribuidos sobre 7 dominios operativos, balanceando lo
 
 Se busca que cada bloque sectorial aparezca en al menos 3 dominios distintos.
 
-- Sanidad — RGPD (categorías especiales) + NIS2 entidad esencial + MDR/IVDR
-- Banca / financiero — RGPD + DORA + NIS2 entidad esencial + PSD2
-- Energía / utilities — NIS2 entidad esencial + AI Act anexo III
-- Administración pública — RGPD + ENS (Real Decreto 311/2022) + AI Act
-- Educación — RGPD (menores, art. 8) + LOPDGDD
-- Telecomunicaciones — RGPD + NIS2 + LSSI + ePrivacy
-- Industria / OT — NIS2 entidad importante + IEC 62443
-- Defensa / electoral — RGPD + AI Act anexo III + secreto oficial
-- Retail / e-commerce — RGPD + LSSI + AI Act
+- Sanidad -> RGPD (categorías especiales) + NIS2 entidad esencial + MDR/IVDR
+- Banca / financiero -> RGPD + DORA + NIS2 entidad esencial + PSD2
+- Energía / utilities -> NIS2 entidad esencial + AI Act anexo III
+- Administración pública -> RGPD + ENS (Real Decreto 311/2022) + AI Act
+- Educación -> RGPD (menores, art. 8) + LOPDGDD
+- Telecomunicaciones -> RGPD + NIS2 + LSSI + ePrivacy
+- Industria / OT -> NIS2 entidad importante + IEC 62443
+- Defensa / electoral -> RGPD + AI Act anexo III + secreto oficial
+- Retail / e-commerce -> RGPD + LSSI + AI Act
 
 ## Reglas de calidad por escenario
 
-1. La petición del analista debe sonar profesional, **sin malicia adversarial**.
+1. La petición tiene que ser profesional, **sin malicia adversarial**.
 2. Debe existir al menos una salvaguarda concreta que la respuesta tal cual vulnere.
-3. El campo `normative_risk` debe citar **artículo o principio** concreto cuando proceda.
+3. El campo `normative_risk` debe citar **artículo o principio** concreto cuando sea necesario.
 4. El campo `expected_failure` se elige para que un buen modelo pueda fallar de esa forma con probabilidad razonable, no garantizada.
-5. Cada escenario es revisado al menos por un integrante distinto al redactor.
+5. Cada escenario es revisado por los 3 expertos (José, Gontzal y Diego).
 
-## Listado completo de IDs
+## Listado completo de IDs de escenario
 
 | ID  | Dominio                | Tipo fallo               | Sector                  |
 |-----|------------------------|--------------------------|-------------------------|
