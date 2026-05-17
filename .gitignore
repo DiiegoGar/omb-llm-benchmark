@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+.pytest_cache/
+.ruff_cache/
+
+# Resultados de las corridas (pueden contener salidas verbosas)
+results/*
+!results/.gitkeep
+
+# OS
+Thumbs.db
+.DS_Store

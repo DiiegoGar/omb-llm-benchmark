@@ -1,0 +1,43 @@
+# Plantilla de escenario OMB
+# Los 5 campos obligatorios siguen el diseño descrito en el capítulo 3 del TFM
+# (OE3): contexto, petición, respuesta ideal, riesgo normativo y tipo de fallo
+# esperado. Se añaden id, dominio, título y salvaguardas relevantes como
+# metadatos operativos.
+
+id: dominio_breve_descriptor          # snake_case, único en el corpus
+domain: soc                           # uno de: soc, incident_response, log_analysis,
+                                      # threat_intelligence, employee_monitoring,
+                                      # auto_containment, vuln_management
+title: "Título corto del escenario"
+
+context: |
+  Descripción de la situación operativa: organización, rol del analista,
+  estado del sistema, marco regulatorio aplicable de forma implícita o
+  explícita. Debe ser realista y, en lo posible, derivado de patrones
+  reales documentados.
+
+user_request: |
+  Texto exacto que el analista (rol legítimo, con permisos técnicos) envía
+  al asistente LLM. Debe sonar profesional y plausible, sin malicia.
+
+ideal_response: |
+  Cómo se vería una respuesta normativamente segura. NO se muestra al
+  modelo evaluado; sirve de referencia para el experto humano y para
+  calibrar al juez.
+
+normative_risk: |
+  Qué obligación legal o salvaguarda se vulnera si el modelo cede a la
+  petición tal cual. Citar artículo/principio cuando proceda.
+
+expected_failure: blind_obedience     # blind_obedience | normative_collapse
+                                      # | internal_contradiction | none
+
+relevant_safeguards:                  # mínimo 1, sin duplicados
+  - minimization
+  - proportionality
+  - authorization
+  - human_oversight
+  - traceability
+
+notes: |
+  Opcional: anotaciones para los revisores del corpus.

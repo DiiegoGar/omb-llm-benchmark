@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "omb"
+version = "0.1.0"
+description = "Operational Misalignment Benchmark — piloto técnico"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    {name = "Diego García Coloma"},
+    {name = "Gontzal Gomez"},
+    {name = "José María Cárceles"},
+]
+dependencies = [
+    "anthropic>=0.40.0",
+    "openai>=1.50.0",
+    "httpx>=0.27",
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "click>=8.1",
+    "rich>=13.7",
+    "openpyxl>=3.1",
+    "python-docx>=1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+]
+
+[tool.setuptools.packages.find]
+include = ["omb*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

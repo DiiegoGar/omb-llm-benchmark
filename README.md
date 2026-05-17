@@ -1,100 +1,64 @@
-# Operational Misalignment Benchmark (OMB)
+# OMB — Piloto técnico
 
-> TFM — Máster en Inteligencia Artificial · UNIR · 2026  
-> Diego García · Gontzal Gomez · José María Cárceles  
-> Director: Igor Santos-Grueiro
+Implementación del **Operational Misalignment Benchmark (OMB)** descrito en el TFM
+*Operational Misalignment Benchmark (OMB)* (UNIR, Máster en IA).
 
----
+Este piloto valida, sobre un corpus reducido (3–10 escenarios) y un único modelo
+evaluado, que el marco LLM-as-a-Judge mide lo que pretende medir antes de
+escalar el experimento completo.
 
-## ¿Qué es el OMB?
-
-El **Operational Misalignment Benchmark** es un framework de evaluación que mide el **alineamiento normativo** de modelos de lenguaje de gran tamaño (LLMs) en escenarios de ciberseguridad, conforme al marco regulatorio europeo (RGPD, NIS2 y AI Act).
-
-A diferencia de benchmarks como CTIBench o CyberSecEval 2, el OMB introduce una **tercera dimensión de evaluación** junto a la utilidad técnica y la seguridad frente a ataques:
+## Estructura
 
 ```
-        Corrección Operativa
-              △
-             / \
-            /   \
-           /     \
-          /  OMB  \
-         /         \
-        ▽-----------▽
-   Seguridad    Alineamiento
-   (Safety)      Normativo
+omb/                Código del benchmark
+  models.py         Esquemas Pydantic (Scenario, JudgeVerdict, RunRecord)
+  safeguards.py     Las 5 salvaguardas operativas (RGPD / NIS2 / AI Act)
+  taxonomy.py       Los 3 tipos de fallo (obediencia ciega, colapso, contradicción)
+  prompts.py        Las 3 condiciones experimentales + prompt del juez
+  providers.py      Cliente LLM (Anthropic por defecto, extensible)
+  metrics.py        UHR y métricas complementarias
+  pipeline.py       Orquestador de la corrida
+
+corpus/
+  _template.yaml    Plantilla con los 5 campos obligatorios
+  pilot/            Escenarios piloto en YAML (uno por archivo)
+
+scripts/
+  run_pilot.py      Ejecuta la corrida y guarda results/<timestamp>/
+  validate_corpus.py  Valida los YAML contra el esquema
+
+results/            Salidas de cada corrida (JSONL + resumen)
 ```
 
-## Taxonomía de errores
+## Puesta en marcha
 
-El OMB clasifica las respuestas de los modelos en tres tipos de fallo:
+```powershell
+# 1. Crear entorno virtual
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
 
-| Tipo | Nombre | Descripción |
-|------|--------|-------------|
-| E1 | **Obediencia ciega** | El modelo ejecuta tareas éticamente cuestionables porque el usuario tiene permisos técnicos, sin evaluar la proporcionalidad o base jurídica |
-| E2 | **Colapso del contexto normativo** | El modelo olvida las restricciones legales al priorizar la eficiencia técnica |
-| E3 | **Contradicción interna** | El modelo reconoce la norma aplicable pero propone una solución que la infringe |
+# 2. Instalar dependencias
+pip install -e .
 
-## Estructura del repositorio
+# 3. Configurar claves
+Copy-Item .env.example .env
+# editar .env con la ANTHROPIC_API_KEY
 
-```
-operational-misalignment-benchmark/
-│
-├── corpus/                  # Dilemas operativos (≥50 escenarios)
-│   ├── dilemmas.json        # Corpus principal
-│   └── schema.json          # Esquema de validación
-│
-├── evaluator/               # Marco de evaluación LLM-as-a-Judge
-│   ├── judge.py             # Lógica principal del modelo juez
-│   ├── prompts.py           # System prompts y rúbricas
-│   ├── metrics.py           # Índice de desalineamiento (OAI)
-│   └── runner.py            # Ejecución del benchmark completo
-│
-├── results/                 # Resultados experimentales (gitignored raw data)
-│   └── .gitkeep
-│
-├── tests/                   # Tests unitarios
-│   └── test_metrics.py
-│
-├── docs/                    # Documentación técnica adicional
-│
-├── config.py                # Configuración global (modelos, parámetros)
-├── main.py                  # Punto de entrada principal
-├── requirements.txt
-└── README.md
+# 4. Validar el corpus piloto
+python scripts/validate_corpus.py
+
+# 5. Ejecutar el piloto
+python scripts/run_pilot.py --models claude-sonnet-4-6 --corpus corpus/pilot
 ```
 
-## Instalación
+## Trazabilidad con el TFM
 
-```bash
-git clone https://github.com/<org>/operational-misalignment-benchmark.git
-cd operational-misalignment-benchmark
-pip install -r requirements.txt
-```
-
-## Uso rápido
-
-```bash
-# Evaluar un modelo con el corpus completo
-python main.py --model gpt-4o --output results/gpt4o_run1.json
-
-# Evaluar múltiples modelos
-python main.py --model gpt-4o llama-3 mistral --output results/
-
-# Ver métricas de una ejecución
-python main.py --report results/gpt4o_run1.json
-```
-
-## Marco regulatorio cubierto
-
-- 🇪🇺 **RGPD** — Minimización de datos, limitación de finalidad, responsabilidad proactiva
-- 🛡️ **NIS2** — Gestión de riesgos, resiliencia, notificación de incidentes
-- 🤖 **AI Act** — Transparencia, supervisión humana, clasificación por riesgo
-
-## Criterio de éxito
-
-Acuerdo ≥ 80% entre las clasificaciones del modelo juez y el criterio experto del equipo sobre una muestra representativa del corpus.
-
----
-
-*Trabajo académico — UNIR 2026*
+| Artefacto del TFM         | Implementación                |
+|---------------------------|-------------------------------|
+| Catálogo de salvaguardas  | `omb/safeguards.py`           |
+| Taxonomía de fallos       | `omb/taxonomy.py`             |
+| Plantilla de escenario    | `corpus/_template.yaml`       |
+| Rúbrica (UHR + comp.)     | `omb/metrics.py`              |
+| Condiciones de prompt     | `omb/prompts.py`              |
+| LLM-as-a-Judge            | `omb/prompts.py` + `providers.py` |
+| Protocolo experimental    | `omb/pipeline.py`             |
