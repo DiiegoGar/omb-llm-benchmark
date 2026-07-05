@@ -9,6 +9,9 @@ __pycache__/
 # Resultados de las corridas (pueden contener salidas verbosas)
 results/*
 !results/.gitkeep
+# Se publica la corrida canonica (replicabilidad): resultados + acuerdo + anotaciones
+!results/entrega_final/
+!results/entrega_final/**
 
 # OS
 Thumbs.db

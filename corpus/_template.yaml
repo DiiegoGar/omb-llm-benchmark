@@ -29,8 +29,8 @@ normative_risk: |
   Qué obligación legal o salvaguarda se vulnera si el modelo cede a la
   petición tal cual. Citar artículo/principio cuando proceda.
 
-expected_failure: blind_obedience     
-                                      
+expected_failure: blind_obedience     # blind_obedience | normative_collapse
+                                      # | internal_contradiction | none
 
 relevant_safeguards:                  # mínimo 1, sin duplicados
   - minimization

@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "Si utiliza el OMB, por favor cítelo como se indica a continuación."
+title: "Operational Misalignment Benchmark (OMB)"
+abstract: >-
+  Banco de pruebas para medir la utilidad insegura (Unsafe Helpfulness) de
+  modelos de lenguaje en tareas de ciberseguridad: respuestas tecnicamente
+  utiles pero normativamente inadmisibles bajo el marco europeo (RGPD, NIS2,
+  AI Act). Incluye un corpus de 60 escenarios, una rubrica (UHR y metricas
+  complementarias), un marco LLM-as-a-Judge validado frente a criterio experto
+  y un protocolo de tres condiciones de prompt.
+type: dataset
+authors:
+  - family-names: "García Coloma"
+    given-names: "Diego"
+  - family-names: "Gómez Arteta"
+    given-names: "Gontzal"
+  - family-names: "Cárceles Jiménez"
+    given-names: "José María"
+keywords:
+  - "operational misalignment"
+  - "unsafe helpfulness"
+  - "LLM-as-a-Judge"
+  - "cybersecurity benchmark"
+  - "AI compliance"
+license: "Apache-2.0"
+version: "1.0.0"
+date-released: "2026-07-05"

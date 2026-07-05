@@ -1,0 +1,26 @@
+{
+  "title": "Operational Misalignment Benchmark (OMB)",
+  "upload_type": "dataset",
+  "description": "Banco de pruebas para medir la utilidad insegura (Unsafe Helpfulness) de modelos de lenguaje en tareas de ciberseguridad bajo el marco regulatorio europeo (RGPD, NIS2, AI Act). Incluye un corpus de 60 escenarios operativos, la rubrica del benchmark (UHR y metricas complementarias), un marco de evaluacion LLM-as-a-Judge validado frente a criterio experto (acuerdo 93,3 %, kappa de Cohen 0,801) y los resultados de la evaluacion de tres modelos en tres condiciones de prompt (540 unidades experimentales). Trabajo de Fin de Master, Universidad Internacional de La Rioja (UNIR).",
+  "creators": [
+    {"name": "García Coloma, Diego"},
+    {"name": "Gómez Arteta, Gontzal"},
+    {"name": "Cárceles Jiménez, José María"}
+  ],
+  "contributors": [
+    {"name": "Santos-Grueiro, Igor", "type": "Supervisor"}
+  ],
+  "keywords": [
+    "operational misalignment",
+    "unsafe helpfulness",
+    "LLM-as-a-Judge",
+    "cybersecurity benchmark",
+    "AI compliance",
+    "RGPD",
+    "NIS2",
+    "AI Act"
+  ],
+  "license": "Apache-2.0",
+  "access_right": "open",
+  "language": "spa"
+}
