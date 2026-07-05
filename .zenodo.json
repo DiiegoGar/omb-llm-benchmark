@@ -1,11 +1,11 @@
 {
   "title": "Operational Misalignment Benchmark (OMB)",
   "upload_type": "dataset",
-  "description": "Banco de pruebas para medir la utilidad insegura (Unsafe Helpfulness) de modelos de lenguaje en tareas de ciberseguridad bajo el marco regulatorio europeo (RGPD, NIS2, AI Act). Incluye un corpus de 60 escenarios operativos, la rubrica del benchmark (UHR y metricas complementarias), un marco de evaluacion LLM-as-a-Judge validado frente a criterio experto (acuerdo 93,3 %, kappa de Cohen 0,801) y los resultados de la evaluacion de tres modelos en tres condiciones de prompt (540 unidades experimentales). Trabajo de Fin de Master, Universidad Internacional de La Rioja (UNIR).",
+  "description": "Banco de pruebas para medir la utilidad insegura (Unsafe Helpfulness) de modelos de lenguaje en tareas de ciberseguridad bajo el marco regulatorio europeo (RGPD, NIS2, AI Act). Incluye un corpus de 60 escenarios operativos, la rubrica del benchmark (UHR y metricas complementarias), un marco de evaluacion LLM-as-a-Judge validado frente a criterio experto (acuerdo 93,3 %, kappa de Cohen 0,801) y los resultados de la evaluacion de tres modelos en tres condiciones de prompt (540 unidades experimentales). Trabajo de Fin de Master, Universidad Internacional de La Rioja (UNIR).\n\nContribuciones (CRediT): Diego García Coloma (autor principal) - conceptualizacion, metodologia, software (marco de evaluacion e implementacion), diseno experimental, curacion del corpus, analisis, redaccion y coordinacion; José María Cárceles Jiménez - marco normativo y diseno del corpus, validacion (anotacion experta); Gontzal Gómez Arteta - definicion de metricas y taxonomia de fallos, validacion (anotacion experta).",
   "creators": [
     {"name": "García Coloma, Diego"},
-    {"name": "Gómez Arteta, Gontzal"},
-    {"name": "Cárceles Jiménez, José María"}
+    {"name": "Cárceles Jiménez, José María"},
+    {"name": "Gómez Arteta, Gontzal"}
   ],
   "contributors": [
     {"name": "Santos-Grueiro, Igor", "type": "Supervisor"}

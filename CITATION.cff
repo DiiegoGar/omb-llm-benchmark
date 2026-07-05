@@ -9,13 +9,23 @@ abstract: >-
   complementarias), un marco LLM-as-a-Judge validado frente a criterio experto
   y un protocolo de tres condiciones de prompt.
 type: dataset
+# Autores por orden de contribucion (el primero es el autor principal / lead).
+# Reparto de roles (CRediT), coherente con el capitulo de organizacion del TFM:
+#   - Diego García Coloma (autor principal): conceptualizacion, metodologia,
+#     software (marco de evaluacion LLM-as-a-Judge e implementacion en Python),
+#     diseno experimental, curacion del corpus, analisis, redaccion y
+#     coordinacion del proyecto.
+#   - José María Cárceles Jiménez: marco normativo y diseno del corpus;
+#     validacion (anotacion experta).
+#   - Gontzal Gómez Arteta: definicion de metricas y taxonomia de fallos;
+#     validacion (anotacion experta).
 authors:
   - family-names: "García Coloma"
     given-names: "Diego"
-  - family-names: "Gómez Arteta"
-    given-names: "Gontzal"
   - family-names: "Cárceles Jiménez"
     given-names: "José María"
+  - family-names: "Gómez Arteta"
+    given-names: "Gontzal"
 keywords:
   - "operational misalignment"
   - "unsafe helpfulness"
